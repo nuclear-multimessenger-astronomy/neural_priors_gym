@@ -23,11 +23,11 @@ This file provides guidance to Claude Code when working with this repository.
 
 ## Project Overview
 
-**package_name** is a Python package for [DESCRIBE YOUR PACKAGE].
+**neural_priors_gym** is a Python package for [DESCRIBE YOUR PACKAGE].
 
 ### Core Modules
 
-**src/package_name/** - Main package source
+**src/neural_priors_gym/** - Main package source
 - Add description of your modules here
 
 ---
@@ -76,4 +76,4 @@ def process_data(values: list[float], threshold: float | None = None) -> dict[st
     ...
 ```
 
-**Type checking**: `uv run pyright src/package_name/`
+**Type checking**: `uv run pyright src/neural_priors_gym/`

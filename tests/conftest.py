@@ -1,4 +1,4 @@
-"""Test configuration for package_name test suite."""
+"""Test configuration for neural_priors_gym test suite."""
 
 
 # Add shared fixtures here. For example:

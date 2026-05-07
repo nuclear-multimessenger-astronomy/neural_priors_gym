@@ -1,11 +1,11 @@
-.. currentmodule:: package_name
+.. currentmodule:: neural_priors_gym
 
-package_name
+neural_priors_gym
 ============
 
-These documentation pages detail the various modules and submodules of the ``package_name`` package.
+These documentation pages detail the various modules and submodules of the ``neural_priors_gym`` package.
 
 .. toctree::
    :maxdepth: 1
 
-   package_name.module_a
+   neural_priors_gym.module_a
