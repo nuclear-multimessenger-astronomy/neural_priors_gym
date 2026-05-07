@@ -1,5 +1,6 @@
 [![CI](https://github.com/nuclear-multimessenger-astronomy/neural_priors_gym/actions/workflows/ci.yml/badge.svg)](https://github.com/nuclear-multimessenger-astronomy/neural_priors_gym/actions/workflows/ci.yml)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://nuclear-multimessenger-astronomy.github.io/neural_priors_gym/)
+[![arXiv](https://img.shields.io/badge/arXiv-2511.22987-b31b1b.svg)](https://arxiv.org/abs/2511.22987)
 
 # neural_priors_gym
 
