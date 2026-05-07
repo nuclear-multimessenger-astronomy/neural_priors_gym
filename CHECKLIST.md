@@ -33,11 +33,6 @@ DONE
 ## 4. GitHub repository setup
 
 - [ ] Enable **GitHub Pages** (Settings → Pages → Source: GitHub Actions)
-- [ ] Mark repo as a **template** if you want to reuse it again (Settings → Template repository)
-- [ ] Add repository secrets if needed:
-  - `CODECOV_TOKEN` — for coverage reporting
-  - `ANTHROPIC_API_KEY` — for Claude Code review workflow
-- [ ] Update `.github/CODEOWNERS` with your GitHub username (if `make init` didn't already)
 
 ---
 

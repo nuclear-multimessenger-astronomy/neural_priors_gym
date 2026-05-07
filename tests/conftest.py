@@ -1,6 +1,5 @@
 """Test configuration for neural_priors_gym test suite."""
 
-
 # Add shared fixtures here. For example:
 #
 # import pytest
