@@ -1,5 +1,5 @@
 ``neural_priors_gym.module_a`` module
-================================
+=====================================
 
 .. currentmodule:: neural_priors_gym.module_a
 

@@ -1,5 +1,5 @@
 neural_priors_gym documentation
-==========================
+===============================
 
 *A place to train your neural priors*
 
@@ -38,6 +38,12 @@ Or using ``uv sync``::
 
 Contents
 ========
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Getting started
+
+   examples/getting_started
 
 .. toctree::
    :maxdepth: 2

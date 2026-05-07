@@ -1,6 +1,6 @@
 # Contributing
 
-For full contributing guidelines, see [`CONTRIBUTING.md`](../../CONTRIBUTING.md) at the repository root.
+For full contributing guidelines, see `CONTRIBUTING.md` at the repository root.
 
 ## Quick Reference
 
