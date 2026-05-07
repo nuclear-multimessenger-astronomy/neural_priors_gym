@@ -10,7 +10,7 @@ Steps to follow every time you start a new package from this template.
 make init
 ```
 
-Renames all `package_name` / `YOUR_ORG` / `YOUR_NAME` placeholders in one pass. Run this before doing anything else.
+Renames all `neural_priors_gym` / `nuclear-multimessenger-astronomy` / `YOUR_NAME` placeholders in one pass. Run this before doing anything else.
 
 ---
 
@@ -26,26 +26,13 @@ Installs the package, runs tests, and type-checks. Everything should pass before
 
 ## 3. Fill in the blanks
 
-- [ ] `pyproject.toml` — add runtime `dependencies`
-- [ ] `pyproject.toml` — update `keywords` and `classifiers`
-- [ ] `README.md` — write the tagline and feature table
-- [ ] `CITATION.cff` — add DOI / paper details once published
-- [ ] `docs/conf.py` — verify `project`, `author`, `release` fields
-- [ ] `docs/index.rst` — flesh out the landing page
-- [ ] `docs/_static/` — replace the placeholder SVG logos
-- [ ] `LICENSE` — confirm the year is current
-- [ ] `.python-version` — pin to the Python version you'll develop against
+DONE
 
 ---
 
 ## 4. GitHub repository setup
 
 - [ ] Enable **GitHub Pages** (Settings → Pages → Source: GitHub Actions)
-- [ ] Mark repo as a **template** if you want to reuse it again (Settings → Template repository)
-- [ ] Add repository secrets if needed:
-  - `CODECOV_TOKEN` — for coverage reporting
-  - `ANTHROPIC_API_KEY` — for Claude Code review workflow
-- [ ] Update `.github/CODEOWNERS` with your GitHub username (if `make init` didn't already)
 
 ---
 

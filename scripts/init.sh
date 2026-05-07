@@ -17,6 +17,12 @@ validate_package_name() {
     fi
 }
 
+ask() {
+    local prompt="$1"
+    read -rp "$prompt: " answer
+    echo "$answer"
+}
+
 # ── gather info ───────────────────────────────────────────────────────────────
 echo ""
 echo "=== package-template initializer ==="

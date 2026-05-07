@@ -1,33 +1,15 @@
-package_name documentation
-==========================
+neural_priors_gym documentation
+===============================
 
-*SHORT TAGLINE FOR YOUR PACKAGE*
+*A place to train your neural priors*
 
-``package_name`` does [DESCRIBE WHAT YOUR PACKAGE DOES].
-
-
-What's in ``package_name``?
-============================
-
-``package_name`` provides [DESCRIBE THE KEY COMPONENTS].
-
-.. grid:: 2
-    :class-container: component-grid
-
-    .. grid-item:: :doc:`Module A <api/package_name>`
-
-       Description of module A
-
-    .. grid-item:: :doc:`Module B <api/package_name>`
-
-       Description of module B
+``neural_priors_gym`` makes it easy to train a normalizing flow prior for multimessenger astronomy. It provides a unified interface that is compatible with various codebases and samplers, so you can focus on the science instead of the plumbing.
 
 
 Getting started
 ===============
 
-* Check out the :doc:`examples/getting_started` to get familiar with ``package_name``.
-* Dive into the code itself in the API reference of :doc:`api/package_name`.
+* Will be added soon
 
 
 Installation
@@ -35,7 +17,7 @@ Installation
 
 Install the latest version by cloning the repository::
 
-    git clone https://github.com/YOUR_ORG/package_name
+    git clone https://github.com/nuclear-multimessenger-astronomy/neural_priors_gym
 
 We recommend using ``uv`` for managing the Python environment::
 
@@ -44,7 +26,7 @@ We recommend using ``uv`` for managing the Python environment::
 
 The package can then be installed directly::
 
-    cd package_name
+    cd neural_priors_gym
     uv pip install -e .             # Basic install
     uv pip install -e ".[dev]"      # For developers (tests, docs)
 
@@ -59,9 +41,15 @@ Contents
 
 .. toctree::
    :maxdepth: 2
+   :caption: Getting started
+
+   examples/getting_started
+
+.. toctree::
+   :maxdepth: 2
    :caption: API reference
 
-   api/package_name
+   api/neural_priors_gym
 
 .. toctree::
    :maxdepth: 2

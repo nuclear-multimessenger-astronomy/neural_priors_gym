@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/package_name"]
+packages = ["src/neural_priors_gym"]
 
 [tool.hatch.build.targets.sdist]
 exclude = [
@@ -16,20 +16,21 @@ exclude = [
 ]
 
 [project]
-name = "package_name"
+name = "neural_priors_gym"
 authors = [
-  {name = "YOUR NAME", email = "your@email.com"},
+  {name = "ThibeauWouters", email = "thibeauwouters@gmail.com"},
 ]
 version = "0.0.1"
-description = "SHORT DESCRIPTION OF YOUR PACKAGE"
-keywords = ["keyword1", "keyword2"]
+description = "A place to train your neural priors"
+keywords = ["normalizing-flows", "neutron-stars", "gravitational-waves", "multimessenger-astronomy", "machine-learning", "bayesian-inference"]
 readme = "README.md"
 requires-python = ">=3.11, <3.14"
 license = {file = "LICENSE"}
-urls = {repository = "https://github.com/YOUR_ORG/package_name"}
+urls = {repository = "https://github.com/nuclear-multimessenger-astronomy/neural_priors_gym"}
 dependencies = [
-    # Add your runtime dependencies here
-    # "numpy>=1.24.0",
+    "numpy",
+    "glasflow",
+    "zuko"
 ]
 
 classifiers = [
@@ -96,7 +97,7 @@ order-by-type = false
 
 [tool.pyright]
 reportIncompatibleMethodOverride = true
-include = ["src/package_name"]
+include = ["src/neural_priors_gym"]
 
 # pyproject.toml
 [tool.pytest.ini_options]
@@ -110,7 +111,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["package_name"]
+source = ["neural_priors_gym"]
 omit = ["*/tests/*", "*/examples/*"]
 
 [tool.coverage.report]

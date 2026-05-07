@@ -1,6 +1,6 @@
 # Contributing
 
-For full contributing guidelines, see [`CONTRIBUTING.md`](../../CONTRIBUTING.md) at the repository root.
+For full contributing guidelines, see `CONTRIBUTING.md` at the repository root.
 
 ## Quick Reference
 
@@ -9,7 +9,7 @@ For full contributing guidelines, see [`CONTRIBUTING.md`](../../CONTRIBUTING.md)
 uv run pytest tests/ -m "not slow"
 
 # Type checking
-uv run pyright src/package_name/
+uv run pyright src/neural_priors_gym/
 
 # Pre-commit checks
 uv run pre-commit run --all-files
