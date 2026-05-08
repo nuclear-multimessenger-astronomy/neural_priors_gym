@@ -1,0 +1,47 @@
+# Example config for training a neural prior on BNS source-frame masses
+# with a uniform mass distribution and chiEFT EOS samples.
+#
+# Usage: neural_priors_gym_train config.yaml
+
+output_dir: ./outdir
+
+# source_type: "bns" means both masses are neutron stars (both below MTOV).
+# Use "nsbh" for neutron star-black hole systems (see ../nsbh_uniform/).
+source_type: bns
+
+masses:
+  type: uniform
+  parameter_names:
+    - mass_1_source
+    - mass_2_source
+  m_min: 1.0
+
+lambdas:
+  parameter_names:
+    - lambda_1
+    - lambda_2
+  # Point this to your EOS npz file (must contain masses_EOS and Lambdas_EOS)
+  eos_path: ../../jester/examples/inference/smc_random_walk/chiEFT/eos_samples.npz
+
+flow:
+  backend: glasflow
+  flow_type: CouplingNSF
+  n_transforms: 4
+  n_neurons: 256
+  n_blocks_per_transform: 3
+  num_bins: 8
+  tail_bound: 5.0
+  activation: relu
+  linear_transform: none
+  dropout_probability: 0.0
+  batch_norm_within_blocks: false
+  batch_norm_between_transforms: false
+
+training:
+  n_samples: 20000
+  num_epochs: 500
+  learning_rate: 0.0001
+  batch_size: 1024
+  max_patience: 100
+  validation_split: 0.2
+  scale_input: true

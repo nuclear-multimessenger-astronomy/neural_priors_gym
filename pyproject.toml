@@ -30,7 +30,17 @@ urls = {repository = "https://github.com/nuclear-multimessenger-astronomy/neural
 dependencies = [
     "numpy",
     "glasflow",
-    "zuko"
+    "bilby",
+    "corner",
+    "pydantic>=2.0",
+    "pyyaml",
+    "scipy",
+    "joblib",
+    "matplotlib",
+    "scikit-learn",
+    "torch",
+    "tqdm",
+    "astropy>=7.2.0",
 ]
 
 classifiers = [
@@ -47,6 +57,9 @@ classifiers = [
     'Operating System :: Unix',
     'Operating System :: MacOS',
 ]
+
+[project.scripts]
+neural_priors_gym_train = "neural_priors_gym.cli:cli_entry_point"
 
 [project.optional-dependencies]
 dev = [
@@ -97,6 +110,7 @@ order-by-type = false
 
 [tool.pyright]
 reportIncompatibleMethodOverride = true
+reportPrivateImportUsage = false
 include = ["src/neural_priors_gym"]
 
 # pyproject.toml
