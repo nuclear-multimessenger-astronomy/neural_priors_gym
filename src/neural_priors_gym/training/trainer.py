@@ -84,15 +84,13 @@ class FlowTrainer:
         # Apply log transform to lambda columns in-memory before training.
         # The saved training_data.npz retains raw values; this transform is
         # only visible to the flow and scaler.
-        if self.config.lambdas.log_lambda:
+        _LAMBDA_NAMES = {"lambda_1", "lambda_2", "lambda_tilde", "delta_lambda_tilde"}
+        if cfg.log_lambda:
             data = dict(data)
-            for name in self.config.lambdas.parameter_names:
-                if name in data:
-                    data[name] = np.log(data[name])
-            logger.info(
-                f"Applied log transform to lambda parameters: "
-                f"{self.config.lambdas.parameter_names}"
-            )
+            lambda_cols = [n for n in parameter_names if n in _LAMBDA_NAMES]
+            for name in lambda_cols:
+                data[name] = np.log(data[name])
+            logger.info(f"Applied log transform to lambda parameters: {lambda_cols}")
 
         x_full = np.column_stack([data[name] for name in parameter_names])
         n_inputs = x_full.shape[1]

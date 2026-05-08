@@ -16,7 +16,6 @@ class DoubleGaussianMassGenerator(MassGenerator):
     """
 
     def __init__(self, config: DoubleGaussianMassConfig) -> None:
-        self.parameter_names = config.parameter_names
         self.m_min = config.m_min
         self.mean_1 = config.mean_1
         self.std_1 = config.std_1

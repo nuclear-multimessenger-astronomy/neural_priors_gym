@@ -11,7 +11,6 @@ class UniformMassConfig(NeuralPriorBaseModel):
     """Uniform mass distribution between m_min and MTOV (per EOS sample)."""
 
     type: Literal["uniform"] = "uniform"
-    parameter_names: list[str]
     m_min: float
 
 
@@ -19,7 +18,6 @@ class GaussianMassConfig(NeuralPriorBaseModel):
     """Single Gaussian mass distribution truncated at m_min and MTOV."""
 
     type: Literal["gaussian"] = "gaussian"
-    parameter_names: list[str]
     m_min: float
     mean: float
     std: float
@@ -30,7 +28,6 @@ class DoubleGaussianMassConfig(NeuralPriorBaseModel):
     """Mixture of two Gaussians for the mass distribution."""
 
     type: Literal["double_gaussian"] = "double_gaussian"
-    parameter_names: list[str]
     m_min: float
     mean_1: float
     std_1: float
@@ -49,7 +46,6 @@ class BilbyMassConfig(NeuralPriorBaseModel):
     """
 
     type: Literal["bilby"] = "bilby"
-    parameter_names: list[str]
     prior_file: str
 
 

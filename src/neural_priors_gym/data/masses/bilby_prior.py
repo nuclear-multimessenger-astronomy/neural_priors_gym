@@ -23,7 +23,6 @@ class BilbyPriorMassGenerator(MassGenerator):
     """
 
     def __init__(self, config: BilbyMassConfig) -> None:
-        self.parameter_names = config.parameter_names
         prior_file = Path(config.prior_file)
         if not prior_file.exists():
             raise FileNotFoundError(f"Prior file not found: {prior_file}")
@@ -39,7 +38,7 @@ class BilbyPriorMassGenerator(MassGenerator):
         samples = prior.sample(n_samples)
         samples = generate_all_bns_parameters(samples)
 
-        name_1, name_2 = self.parameter_names[0], self.parameter_names[1]
+        name_1, name_2 = "mass_1_source", "mass_2_source"
         if name_1 not in samples or name_2 not in samples:
             raise ValueError(
                 f"generate_all_bns_parameters did not produce '{name_1}' and "

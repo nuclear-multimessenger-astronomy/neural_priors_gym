@@ -24,7 +24,6 @@ class NSBHMassGenerator(MassGenerator):
     def __init__(self, ns_generator: MassGenerator, m_max_bh: float) -> None:
         self.ns_generator = ns_generator
         self.m_max_bh = m_max_bh
-        self.parameter_names = ns_generator.parameter_names
 
     def generate(self, n_samples: int, mtov_array: np.ndarray) -> np.ndarray:
         eos_indices = np.random.randint(0, len(mtov_array), size=n_samples)

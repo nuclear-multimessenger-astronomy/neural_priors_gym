@@ -26,14 +26,20 @@ def test_load_gaussian_config(tmp_path: Path, small_eos_npz: Path) -> None:
         "output_dir": str(tmp_path),
         "masses": {
             "type": "gaussian",
-            "parameter_names": ["mass_1_source", "mass_2_source"],
             "m_min": 1.0,
             "mean": 1.33,
             "std": 0.09,
         },
         "lambdas": {"eos_path": str(small_eos_npz)},
         "flow": {"backend": "glasflow"},
-        "training": {},
+        "training": {
+            "parameter_names": [
+                "mass_1_source",
+                "mass_2_source",
+                "lambda_1",
+                "lambda_2",
+            ]
+        },
     }
     path = tmp_path / "config.yaml"
     with open(path, "w") as f:
@@ -48,7 +54,6 @@ def test_load_double_gaussian_config(tmp_path: Path, small_eos_npz: Path) -> Non
         "output_dir": str(tmp_path),
         "masses": {
             "type": "double_gaussian",
-            "parameter_names": ["mass_1_source", "mass_2_source"],
             "m_min": 1.0,
             "mean_1": 1.34,
             "std_1": 0.07,
@@ -58,7 +63,14 @@ def test_load_double_gaussian_config(tmp_path: Path, small_eos_npz: Path) -> Non
         },
         "lambdas": {"eos_path": str(small_eos_npz)},
         "flow": {"backend": "glasflow"},
-        "training": {},
+        "training": {
+            "parameter_names": [
+                "mass_1_source",
+                "mass_2_source",
+                "lambda_1",
+                "lambda_2",
+            ]
+        },
     }
     path = tmp_path / "config.yaml"
     with open(path, "w") as f:
@@ -74,13 +86,19 @@ def test_invalid_extra_field_raises(tmp_path: Path, small_eos_npz: Path) -> None
         "output_dir": str(tmp_path),
         "masses": {
             "type": "uniform",
-            "parameter_names": ["mass_1_source", "mass_2_source"],
             "m_min": 1.0,
             "unknown_field": 42,
         },
         "lambdas": {"eos_path": str(small_eos_npz)},
         "flow": {"backend": "glasflow"},
-        "training": {},
+        "training": {
+            "parameter_names": [
+                "mass_1_source",
+                "mass_2_source",
+                "lambda_1",
+                "lambda_2",
+            ]
+        },
     }
     path = tmp_path / "config.yaml"
     with open(path, "w") as f:
@@ -94,12 +112,18 @@ def test_missing_eos_path_raises(tmp_path: Path) -> None:
         "output_dir": str(tmp_path),
         "masses": {
             "type": "uniform",
-            "parameter_names": ["mass_1_source", "mass_2_source"],
             "m_min": 1.0,
         },
         "lambdas": {},
         "flow": {"backend": "glasflow"},
-        "training": {},
+        "training": {
+            "parameter_names": [
+                "mass_1_source",
+                "mass_2_source",
+                "lambda_1",
+                "lambda_2",
+            ]
+        },
     }
     path = tmp_path / "config.yaml"
     with open(path, "w") as f:
@@ -122,17 +146,24 @@ def test_relative_eos_path_resolved(tmp_path: Path, small_eos_npz: Path) -> None
         "output_dir": "./outdir",
         "masses": {
             "type": "uniform",
-            "parameter_names": ["mass_1_source", "mass_2_source"],
             "m_min": 1.0,
         },
         "lambdas": {"eos_path": "../eos_samples.npz"},
         "flow": {"backend": "glasflow"},
-        "training": {},
+        "training": {
+            "parameter_names": [
+                "mass_1_source",
+                "mass_2_source",
+                "lambda_1",
+                "lambda_2",
+            ]
+        },
     }
     path = config_dir / "config.yaml"
     with open(path, "w") as f:
         yaml.dump(cfg, f)
 
     config = load_config(path)
-    assert Path(config.lambdas.eos_path).is_absolute()
-    assert Path(config.lambdas.eos_path).exists()
+    assert config.lambdas is not None
+    assert Path(config.lambdas.eos_path).is_absolute()  # type: ignore[arg-type]
+    assert Path(config.lambdas.eos_path).exists()  # type: ignore[arg-type]

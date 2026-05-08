@@ -66,6 +66,18 @@ def load_config(config_path: Union[str, Path]) -> TrainingConfig:
                 (config_dir / prior_file).resolve()
             )
 
+    if (
+        "training" in config_dict
+        and isinstance(config_dict["training"], dict)
+        and "data_path" in config_dict["training"]
+        and config_dict["training"]["data_path"] is not None
+    ):
+        data_path = Path(config_dict["training"]["data_path"])
+        if not data_path.is_absolute():
+            config_dict["training"]["data_path"] = str(
+                (config_dir / data_path).resolve()
+            )
+
     if "output_dir" in config_dict:
         output_dir = Path(config_dict["output_dir"])
         if not output_dir.is_absolute():

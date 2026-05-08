@@ -1,10 +1,10 @@
 # Example config for training a neural prior on BNS source-frame masses
-# with a double Gaussian mass distribution and chiEFT EOS samples.
+# with a single Gaussian mass distribution and chiEFT EOS samples.
 #
 # The flow is trained on chirp_mass_source and mass_ratio rather than
 # component masses, which is more natural for use in bilby inference.
-# Component masses are always generated internally; the parameter_names
-# field selects which quantities appear in the training data and the flow.
+# Component masses are always generated internally; training.parameter_names
+# selects which quantities enter the flow.
 #
 # Population hyperparameters are taken from arXiv:2407.16669.
 #
@@ -17,19 +17,11 @@ source_type: bns
 
 masses:
   type: gaussian
-  # The flow will be trained on chirp_mass_source and mass_ratio.
-  # Use [mass_1_source, mass_2_source] to train on component masses instead.
-  parameter_names:
-    - chirp_mass_source
-    - mass_ratio
   m_min: 1.0
   mean: 1.33
   std: 0.07
 
 lambdas:
-  parameter_names:
-    - lambda_1
-    - lambda_2
   # Point this to your EOS npz file (must contain masses_EOS and Lambdas_EOS)
   eos_path: ../../eos_samples.npz
 
@@ -47,6 +39,13 @@ flow:
   batch_norm_between_transforms: false
 
 training:
+  # Train on chirp mass and mass ratio instead of component masses.
+  # Use [mass_1_source, mass_2_source, lambda_1, lambda_2] for component masses.
+  parameter_names:
+    - chirp_mass_source
+    - mass_ratio
+    - lambda_1
+    - lambda_2
   n_samples: 200000
   num_epochs: 500
   learning_rate: 0.0001

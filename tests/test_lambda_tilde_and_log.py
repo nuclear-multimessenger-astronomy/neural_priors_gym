@@ -16,9 +16,6 @@ from neural_priors_gym.data.lambdas.interpolator import EOSLambdaInterpolator
 from neural_priors_gym.data.masses.uniform import UniformMassGenerator
 
 
-PARAM_NAMES = ["mass_1_source", "mass_2_source"]
-
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -32,11 +29,9 @@ def bns_tilde_config_yaml(tmp_path: Path, small_eos_npz: Path) -> Path:
         "source_type": "bns",
         "masses": {
             "type": "uniform",
-            "parameter_names": ["mass_1_source", "mass_2_source"],
             "m_min": 1.0,
         },
         "lambdas": {
-            "parameter_names": ["lambda_tilde", "delta_lambda_tilde"],
             "eos_path": str(small_eos_npz),
         },
         "flow": {
@@ -47,6 +42,12 @@ def bns_tilde_config_yaml(tmp_path: Path, small_eos_npz: Path) -> Path:
             "num_bins": 4,
         },
         "training": {
+            "parameter_names": [
+                "mass_1_source",
+                "mass_2_source",
+                "lambda_tilde",
+                "delta_lambda_tilde",
+            ],
             "num_epochs": 2,
             "batch_size": 32,
             "n_samples": 100,
@@ -66,13 +67,10 @@ def log_lambda_config_yaml(tmp_path: Path, small_eos_npz: Path) -> Path:
         "source_type": "bns",
         "masses": {
             "type": "uniform",
-            "parameter_names": ["mass_1_source", "mass_2_source"],
             "m_min": 1.0,
         },
         "lambdas": {
-            "parameter_names": ["lambda_1", "lambda_2"],
             "eos_path": str(small_eos_npz),
-            "log_lambda": True,
         },
         "flow": {
             "backend": "glasflow",
@@ -82,6 +80,13 @@ def log_lambda_config_yaml(tmp_path: Path, small_eos_npz: Path) -> Path:
             "num_bins": 4,
         },
         "training": {
+            "parameter_names": [
+                "mass_1_source",
+                "mass_2_source",
+                "lambda_1",
+                "lambda_2",
+            ],
+            "log_lambda": True,
             "num_epochs": 2,
             "batch_size": 32,
             "n_samples": 100,
@@ -165,17 +170,19 @@ def test_equal_masses_symmetry() -> None:
 
 def test_tilde_config_loads(bns_tilde_config_yaml: Path) -> None:
     config = load_config(bns_tilde_config_yaml)
-    assert config.lambdas.parameter_names == ["lambda_tilde", "delta_lambda_tilde"]
+    assert "lambda_tilde" in config.training.parameter_names
+    assert "delta_lambda_tilde" in config.training.parameter_names
 
 
 def test_tilde_generate_keys(bns_tilde_config_yaml: Path) -> None:
     config = load_config(bns_tilde_config_yaml)
     gen = TrainingDataGenerator.from_config(config)
     data = gen.generate()
+    # Generator returns all quantities; all lambda types are present
     assert "lambda_tilde" in data
     assert "delta_lambda_tilde" in data
-    assert "lambda_1" not in data
-    assert "lambda_2" not in data
+    assert "lambda_1" in data
+    assert "lambda_2" in data
 
 
 def test_tilde_lambda_tilde_positive(bns_tilde_config_yaml: Path) -> None:
@@ -186,15 +193,13 @@ def test_tilde_lambda_tilde_positive(bns_tilde_config_yaml: Path) -> None:
 
 
 def test_tilde_and_component_mixed(small_eos_npz: Path) -> None:
-    """User can mix lambda_1 and lambda_tilde in parameter_names."""
-    mass_config = UniformMassConfig(parameter_names=PARAM_NAMES, m_min=1.0)
+    """Generator returns all lambda quantities including lambda_1 and lambda_tilde."""
+    mass_config = UniformMassConfig(m_min=1.0)
     lambda_interp = EOSLambdaInterpolator(LambdaConfig(eos_path=str(small_eos_npz)))
     gen = TrainingDataGenerator(
         mass_generator=UniformMassGenerator(mass_config),
         lambda_interpolator=lambda_interp,
         n_samples=50,
-        mass_parameter_names=PARAM_NAMES,
-        lambda_parameter_names=["lambda_1", "lambda_tilde"],
         source_type="bns",
     )
     data = gen.generate()
@@ -205,14 +210,12 @@ def test_tilde_and_component_mixed(small_eos_npz: Path) -> None:
 
 def test_tilde_available_for_nsbh(small_eos_npz: Path) -> None:
     """lambda_tilde is available for NSBH (computed with lambda_1=0)."""
-    mass_config = UniformMassConfig(parameter_names=PARAM_NAMES, m_min=1.0)
+    mass_config = UniformMassConfig(m_min=1.0)
     lambda_interp = EOSLambdaInterpolator(LambdaConfig(eos_path=str(small_eos_npz)))
     gen = TrainingDataGenerator(
         mass_generator=UniformMassGenerator(mass_config),
         lambda_interpolator=lambda_interp,
         n_samples=10,
-        mass_parameter_names=PARAM_NAMES,
-        lambda_parameter_names=["lambda_tilde"],
         source_type="nsbh",
     )
     data = gen.generate()
@@ -227,7 +230,7 @@ def test_tilde_available_for_nsbh(small_eos_npz: Path) -> None:
 
 def test_log_lambda_config_loads(log_lambda_config_yaml: Path) -> None:
     config = load_config(log_lambda_config_yaml)
-    assert config.lambdas.log_lambda is True
+    assert config.training.log_lambda is True
 
 
 def test_log_lambda_npz_stores_raw(
@@ -255,9 +258,7 @@ def test_log_lambda_applied_before_training(
     gen = TrainingDataGenerator.from_config(config)
     data = gen.generate()
 
-    parameter_names = list(config.masses.parameter_names) + list(
-        config.lambdas.parameter_names
-    )
+    parameter_names = config.training.parameter_names
     trainer = FlowTrainer(config)
     flow, train_losses, val_losses, scaler = trainer.train(
         data, parameter_names, output_dir=tmp_path
@@ -267,7 +268,7 @@ def test_log_lambda_applied_before_training(
     import numpy as np
 
     x_full = np.column_stack([data[n] for n in parameter_names])
-    # log-transform lambdas for comparison
+    # log-transform lambdas for comparison (indices 2 and 3 are lambda_1, lambda_2)
     x_full[:, 2] = np.log(x_full[:, 2])
     x_full[:, 3] = np.log(x_full[:, 3])
     if scaler is not None:
@@ -277,20 +278,26 @@ def test_log_lambda_applied_before_training(
 
 
 def test_log_lambda_false_by_default(small_eos_npz: Path, tmp_path: Path) -> None:
-    """Default LambdaConfig has log_lambda=False."""
+    """Default training config has log_lambda=False."""
     config_data = {
         "output_dir": str(tmp_path),
         "masses": {
             "type": "uniform",
-            "parameter_names": ["mass_1_source", "mass_2_source"],
             "m_min": 1.0,
         },
         "lambdas": {"eos_path": str(small_eos_npz)},
         "flow": {"backend": "glasflow"},
-        "training": {},
+        "training": {
+            "parameter_names": [
+                "mass_1_source",
+                "mass_2_source",
+                "lambda_1",
+                "lambda_2",
+            ]
+        },
     }
     path = tmp_path / "cfg.yaml"
     with open(path, "w") as f:
         yaml.dump(config_data, f)
     config = load_config(path)
-    assert config.lambdas.log_lambda is False
+    assert config.training.log_lambda is False

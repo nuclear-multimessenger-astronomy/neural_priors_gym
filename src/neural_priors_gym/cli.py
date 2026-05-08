@@ -24,29 +24,50 @@ def main(config: TrainingConfig) -> None:
     """Run the full training pipeline for a neural prior.
 
     Steps:
-    1. Generate training data from EOS samples and mass distribution.
-    2. Save training data as an npz file.
-    3. Train the normalizing flow.
-    4. Save the flow and MinMaxScaler.
-    5. Generate flow samples for evaluation.
-    6. Compute JSD between training data and flow samples.
-    7. Save loss plot and corner plot.
+    1. Generate training data (or load from ``training.data_path``).
+    2. Validate that all ``training.parameter_names`` exist in the data.
+    3. Save training data as an npz file (generation mode only).
+    4. Train the normalizing flow.
+    5. Save the flow and MinMaxScaler.
+    6. Generate flow samples for evaluation.
+    7. Compute JSD between training data and flow samples.
+    8. Save loss plot and corner plot.
     """
     output_dir = Path(config.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    parameter_names = list(config.masses.parameter_names) + list(
-        config.lambdas.parameter_names
-    )
+    parameter_names = config.training.parameter_names
     logger.info(f"Training neural prior for parameters: {parameter_names}")
 
-    # Generate training data
-    data_gen = TrainingDataGenerator.from_config(config)
-    training_data = data_gen.generate()
+    if config.training.data_path is not None:
+        # User-supplied npz — skip generation entirely.
+        data_path = Path(config.training.data_path)
+        if not data_path.exists():
+            raise FileNotFoundError(f"data_path not found: {data_path}")
+        logger.info(f"Loading training data from {data_path}")
+        raw = np.load(data_path)
+        training_data: dict[str, np.ndarray] = {k: raw[k] for k in raw.files}
+        missing = [n for n in parameter_names if n not in training_data]
+        if missing:
+            raise ValueError(
+                f"The following parameter_names are not present in the npz file "
+                f"{data_path}: {missing}. Available keys: {sorted(training_data)}"
+            )
+    else:
+        # Generate training data from masses + lambdas config.
+        data_gen = TrainingDataGenerator.from_config(config)
+        training_data = data_gen.generate()
 
-    training_data_path = output_dir / "training_data.npz"
-    np.savez(training_data_path, allow_pickle=True, **training_data)
-    logger.info(f"Training data saved to {training_data_path}")
+        missing = [n for n in parameter_names if n not in training_data]
+        if missing:
+            raise ValueError(
+                f"The following parameter_names were not produced by the generator: "
+                f"{missing}. Available keys: {sorted(training_data)}"
+            )
+
+        training_data_path = output_dir / "training_data.npz"
+        np.savez(training_data_path, allow_pickle=True, **training_data)
+        logger.info(f"Training data saved to {training_data_path}")
 
     # Plot training data samples so users can inspect the generated prior
     x_data = np.column_stack([training_data[name] for name in parameter_names])

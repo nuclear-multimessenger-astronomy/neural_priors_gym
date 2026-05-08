@@ -29,11 +29,9 @@ def small_config_yaml(tmp_path: Path, small_eos_npz: Path) -> Path:
         "output_dir": str(tmp_path / "outdir"),
         "masses": {
             "type": "uniform",
-            "parameter_names": ["mass_1_source", "mass_2_source"],
             "m_min": 1.0,
         },
         "lambdas": {
-            "parameter_names": ["lambda_1", "lambda_2"],
             "eos_path": str(small_eos_npz),
         },
         "flow": {
@@ -44,6 +42,12 @@ def small_config_yaml(tmp_path: Path, small_eos_npz: Path) -> Path:
             "num_bins": 4,
         },
         "training": {
+            "parameter_names": [
+                "mass_1_source",
+                "mass_2_source",
+                "lambda_1",
+                "lambda_2",
+            ],
             "num_epochs": 5,
             "learning_rate": 1e-3,
             "batch_size": 64,

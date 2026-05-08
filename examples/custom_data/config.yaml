@@ -1,0 +1,42 @@
+# Example config for training a neural prior on user-supplied training data.
+#
+# Instead of generating masses and lambdas from an EOS file, the user provides
+# a pre-generated .npz file via training.data_path. The masses and lambdas
+# sections are omitted entirely.
+#
+# The npz file must contain all keys listed in training.parameter_names.
+# Any parameter names are supported as long as they exist in the file.
+#
+# Usage: neural_priors_gym_train config.yaml
+
+output_dir: ./outdir
+
+flow:
+  backend: glasflow
+  n_transforms: 4
+  n_neurons: 256
+  n_blocks_per_transform: 3
+  num_bins: 8
+  tail_bound: 5.0
+  activation: relu
+  linear_transform: none
+  dropout_probability: 0.0
+  batch_norm_within_blocks: false
+  batch_norm_between_transforms: false
+
+training:
+  # Path to a pre-generated .npz file. Must contain all keys in parameter_names.
+  data_path: ./my_training_data.npz
+  # Select the columns from the npz file to train on.
+  parameter_names:
+    - mass_1_source
+    - mass_2_source
+    - lambda_1
+    - lambda_2
+  n_samples: 20000   # used only when generating data; ignored when data_path is set
+  num_epochs: 500
+  learning_rate: 0.0001
+  batch_size: 1024
+  max_patience: 100
+  validation_split: 0.2
+  scale_input: true
