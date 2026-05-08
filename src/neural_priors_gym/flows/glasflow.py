@@ -114,6 +114,13 @@ class GlasflowNSF(FlowBase):
             lp = self._flow.log_prob(inputs=x_tensor)
         return lp.cpu().numpy()
 
+    def latent_to_data(self, z: np.ndarray) -> np.ndarray:
+        self._flow.eval()
+        z_tensor = torch.tensor(z, dtype=torch.float32).to(DEVICE)
+        with torch.inference_mode():
+            x, _ = self._flow.inverse(z_tensor)
+        return x.cpu().numpy()
+
     def save(self, directory: Path) -> None:
         """Save model weights and hyperparameters to directory."""
         directory = Path(directory)

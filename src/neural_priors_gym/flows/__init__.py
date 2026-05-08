@@ -2,5 +2,6 @@
 
 from .base import FlowBase
 from .glasflow import GlasflowNSF
+from .zuko_maf import ZukoMAF
 
-__all__ = ["FlowBase", "GlasflowNSF"]
+__all__ = ["FlowBase", "GlasflowNSF", "ZukoMAF"]
