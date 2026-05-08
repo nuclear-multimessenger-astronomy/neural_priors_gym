@@ -210,7 +210,10 @@ a set of EOS samples. For each training sample, a random EOS is drawn from the
 provided file and $\Lambda(M)$ is evaluated at the sampled mass by linear
 interpolation.
 
-::::{dropdown} **Lambda configuration**
+Exactly one of `eos_path` or `jester_path` must be set; they are mutually
+exclusive.
+
+::::{dropdown} **Lambda configuration — npz file**
 :open:
 
 ```yaml
@@ -218,7 +221,7 @@ lambdas:
   parameter_names:             # Lambda quantities to include in the training data
     - lambda_1
     - lambda_2
-  eos_path: /path/to/eos_samples.npz   # Path to the EOS sample file (required)
+  eos_path: /path/to/eos_samples.npz   # Path to a NumPy npz EOS file
   log_lambda: false            # Apply log transform to Lambda before training
 ```
 
@@ -227,16 +230,34 @@ lambdas:
 - **`parameter_names`** (`list[str]`, default: `["lambda_1", "lambda_2"]`) —
   Lambda quantities to include. Supported names for BNS systems:
   `lambda_1`, `lambda_2`, `lambda_tilde`, `delta_lambda_tilde`.
-  For NSBH systems (``source_type: "nsbh"``), only `lambda_2` is supported,
+  For NSBH systems (`source_type: "nsbh"`), only `lambda_2` is supported,
   since the black hole contributes no tidal deformability.
-- **`eos_path`** (`str`, **required**) — Path to a NumPy `.npz` archive
+- **`eos_path`** (`str | null`, default: `null`) — Path to a NumPy `.npz` archive
   containing the arrays `masses_EOS` and `Lambdas_EOS`, each of shape
   `(n_eos, n_mass_points)`. EOS samples with any negative $\Lambda$ values are
-  automatically removed at load time.
+  automatically removed at load time. Mutually exclusive with `jester_path`.
+- **`jester_path`** (`str | null`, default: `null`) — Path to a
+  [jester](https://github.com/nuclear-multimessenger-astronomy/jester) inference
+  result `.h5` file. The posterior must contain `masses_EOS` and `Lambdas_EOS`
+  arrays. Mutually exclusive with `eos_path`.
 - **`log_lambda`** (`bool`, default: `false`) — When `true`, a natural-log
   transform is applied to all Lambda columns before the scaler and flow see the
-  data. The raw (untransformed) values are always written to ``training_data.npz``;
+  data. The raw (untransformed) values are always written to `training_data.npz`;
   only the flow and scaler operate on the log-transformed values.
+
+::::
+
+::::{dropdown} **Lambda configuration — jester HDF5 file**
+
+```yaml
+lambdas:
+  parameter_names:
+    - lambda_1
+    - lambda_2
+  jester_path: /path/to/results.h5   # Path to a jester inference result file
+  log_lambda: false
+```
+
 
 ::::
 

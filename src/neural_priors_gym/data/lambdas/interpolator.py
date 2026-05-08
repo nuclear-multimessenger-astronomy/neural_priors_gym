@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import numpy as np
+from jesterTOV.inference.result import InferenceResult
 
 from neural_priors_gym.config.schemas.lambdas import LambdaConfig
 from neural_priors_gym.logging_config import get_logger
@@ -10,6 +11,25 @@ from neural_priors_gym.logging_config import get_logger
 logger = get_logger("neural_priors_gym.data.lambdas")
 
 LAMBDA_CLIP_MIN = 1e-4
+
+
+def _load_eos_arrays(config: LambdaConfig) -> tuple[np.ndarray, np.ndarray]:
+    """Return (masses_EOS, Lambdas_EOS) from either an npz or jester HDF5 file."""
+    if config.eos_path is not None:
+        path = Path(config.eos_path)
+        if not path.exists():
+            raise FileNotFoundError(f"EOS npz file not found: {path}")
+        logger.info(f"Loading EOS samples from npz: {path}")
+        data = np.load(path)
+        return data["masses_EOS"], data["Lambdas_EOS"]
+
+    path = Path(config.jester_path)  # type: ignore[arg-type]
+    if not path.exists():
+        raise FileNotFoundError(f"Jester result file not found: {path}")
+    logger.info(f"Loading EOS samples from jester result: {path}")
+    result = InferenceResult.load(str(path))
+    posterior = result.posterior
+    return posterior["masses_EOS"], posterior["Lambdas_EOS"]
 
 
 class EOSLambdaInterpolator:
@@ -22,19 +42,14 @@ class EOSLambdaInterpolator:
     Parameters
     ----------
     config:
-        Lambda configuration containing the path to the EOS npz file.
+        Lambda configuration. Either ``eos_path`` (path to a ``.npz`` file)
+        or ``jester_path`` (path to a jester ``.h5`` result file) must be set.
     """
 
     def __init__(self, config: LambdaConfig) -> None:
         self.parameter_names = config.parameter_names
-        eos_path = Path(config.eos_path)
-        if not eos_path.exists():
-            raise FileNotFoundError(f"EOS file not found: {eos_path}")
 
-        logger.info(f"Loading EOS samples from {eos_path}")
-        data = np.load(eos_path)
-        masses_raw: np.ndarray = data["masses_EOS"]
-        lambdas_raw: np.ndarray = data["Lambdas_EOS"]
+        masses_raw, lambdas_raw = _load_eos_arrays(config)
 
         n_total = len(masses_raw)
         keep = np.ones(n_total, dtype=bool)
