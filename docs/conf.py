@@ -125,6 +125,7 @@ suppress_warnings = [
     "bibtex.duplicate_label",
     "bibtex.duplicate_citation",
     "bibtex.missing_field",
+    "misc.copy_overwrite",
 ]
 
 # -- Nitpicky mode configuration ---------------------------------------------
