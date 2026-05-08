@@ -16,19 +16,13 @@ class LambdaConfig(NeuralPriorBaseModel):
     - ``jester_path``: path to a jester inference result ``.h5`` file.
       The posterior must contain ``masses_EOS`` and ``Lambdas_EOS`` arrays.
 
-    Supported ``parameter_names`` (BNS): ``lambda_1``, ``lambda_2``,
-    ``lambda_tilde``, ``delta_lambda_tilde`` (or any combination).
-    For NSBH, only ``lambda_2`` is supported.
-
-    If ``log_lambda`` is ``True``, a natural-log transform is applied to all
-    :math:`\Lambda` columns before the flow sees the data. The saved
-    ``training_data.npz`` always contains raw (untransformed) values.
+    The generator always computes all supported lambda quantities
+    (``lambda_1``, ``lambda_2``, ``lambda_tilde``, ``delta_lambda_tilde``).
+    Which of these enter the flow is controlled by ``training.parameter_names``.
     """
 
-    parameter_names: list[str] = ["lambda_1", "lambda_2"]
     eos_path: str | None = None
     jester_path: str | None = None
-    log_lambda: bool = False
 
     @model_validator(mode="after")
     def _check_exactly_one_path(self) -> "LambdaConfig":

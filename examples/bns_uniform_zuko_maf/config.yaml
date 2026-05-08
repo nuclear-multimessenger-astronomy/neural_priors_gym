@@ -13,15 +13,9 @@ source_type: bns
 
 masses:
   type: uniform
-  parameter_names:
-    - mass_1_source
-    - mass_2_source
   m_min: 1.0
 
 lambdas:
-  parameter_names:
-    - lambda_1
-    - lambda_2
   # Point this to your EOS npz file (must contain masses_EOS and Lambdas_EOS)
   eos_path: ../../jester/examples/inference/smc_random_walk/chiEFT/eos_samples.npz
 
@@ -35,6 +29,11 @@ flow:
     - 64
 
 training:
+  parameter_names:
+    - mass_1_source
+    - mass_2_source
+    - lambda_1
+    - lambda_2
   n_samples: 20000
   num_epochs: 500
   learning_rate: 0.0001

@@ -1,7 +1,6 @@
 """Orchestrates mass and Lambda generation to produce training data."""
 
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 from bilby.gw.conversion import (
@@ -99,16 +98,9 @@ class TrainingDataGenerator:
         Produces Lambda values from EOS samples.
     n_samples:
         Number of training samples to generate.
-    mass_parameter_names:
-        Names for the mass columns in the output. Supported names are
-        "mass_1_source" / "m_1", "mass_2_source" / "m_2",
-        "chirp_mass_source", and "mass_ratio".
-    lambda_parameter_names:
-        Names for the lambda columns (e.g. ["lambda_1", "lambda_2"] for BNS
-        or ["lambda_2"] for NSBH).
     source_type:
-        "bns" or "nsbh". For NSBH, only m2 (the NS) is passed to the lambda
-        interpolator; m1 (the BH) has no tidal deformability.
+        ``"bns"`` or ``"nsbh"``. For NSBH, only m2 (the NS) is passed to the
+        lambda interpolator; m1 (the BH) has no tidal deformability.
     """
 
     def __init__(
@@ -116,52 +108,49 @@ class TrainingDataGenerator:
         mass_generator: MassGenerator,
         lambda_interpolator: EOSLambdaInterpolator,
         n_samples: int,
-        mass_parameter_names: Optional[list[str]] = None,
-        lambda_parameter_names: Optional[list[str]] = None,
         source_type: str = "bns",
     ) -> None:
         self.mass_generator = mass_generator
         self.lambda_interpolator = lambda_interpolator
         self.n_samples = n_samples
-        self.mass_parameter_names = (
-            mass_parameter_names or mass_generator.parameter_names
-        )
-        self.lambda_parameter_names = (
-            lambda_parameter_names or lambda_interpolator.parameter_names
-        )
         self.source_type = source_type
 
     @classmethod
     def from_config(cls, config: TrainingConfig) -> "TrainingDataGenerator":
         """Build a TrainingDataGenerator from a TrainingConfig."""
+        if config.masses is None or config.lambdas is None:
+            raise ValueError(
+                "TrainingDataGenerator.from_config requires 'masses' and 'lambdas' "
+                "to be set in the config. Use 'training.data_path' to load a "
+                "pre-generated npz file instead."
+            )
         mass_gen = build_mass_generator(config)
         lambda_interp = EOSLambdaInterpolator(config.lambdas)
         return cls(
             mass_generator=mass_gen,
             lambda_interpolator=lambda_interp,
             n_samples=config.training.n_samples,
-            mass_parameter_names=config.masses.parameter_names,
-            lambda_parameter_names=config.lambdas.parameter_names,
             source_type=config.source_type,
         )
 
     def generate(self) -> dict[str, np.ndarray]:
         """Generate the full training dataset.
 
-        Component masses (mass_1_source, mass_2_source) are always generated
-        internally. Output names in mass_parameter_names are then looked up
-        from a computed dict that includes derived quantities such as
-        chirp_mass_source and mass_ratio.
+        Always returns all computable mass and lambda quantities. The caller
+        selects which columns to use for training via
+        ``training.parameter_names``.
 
         For NSBH sources, only mass_2_source (the NS) is passed to the lambda
         interpolator. mass_1_source (BH) gets lambda_1=0, so lambda_tilde and
-        delta_lambda_tilde are still well-defined and available as outputs.
+        delta_lambda_tilde are still well-defined.
 
         Returns
         -------
         dict[str, np.ndarray]
-            Dictionary mapping parameter names to 1-D arrays of length
-            n_samples.
+            All supported quantities as 1-D arrays of length ``n_samples``:
+            ``mass_1_source``, ``mass_2_source``, ``chirp_mass_source``,
+            ``mass_ratio``, ``lambda_1``, ``lambda_2``, ``lambda_tilde``,
+            ``delta_lambda_tilde``.
         """
         logger.info(f"Generating {self.n_samples} training samples ...")
 
@@ -170,7 +159,6 @@ class TrainingDataGenerator:
         )
         mass_1_source, mass_2_source = masses[:, 0], masses[:, 1]
 
-        # Compute all supported mass quantities so any name can be looked up.
         mass_quantities = _build_mass_quantities(mass_1_source, mass_2_source)
 
         # For NSBH, only pass mass_2_source (NS) to the interpolator.
@@ -181,7 +169,6 @@ class TrainingDataGenerator:
 
         lambdas = self.lambda_interpolator.interpolate(lambda_masses)
 
-        # Build a registry of all computable lambda quantities.
         if self.source_type == "bns":
             lambda_quantities: dict[str, np.ndarray] = _build_lambda_quantities(
                 mass_1_source, mass_2_source, lambdas[:, 0], lambdas[:, 1]
@@ -194,25 +181,7 @@ class TrainingDataGenerator:
                 mass_1_source, mass_2_source, lambda_1_nsbh, lambda_2_nsbh
             )
 
-        data: dict[str, np.ndarray] = {}
-
-        for name in self.mass_parameter_names:
-            if name not in mass_quantities:
-                raise ValueError(
-                    f"Unknown mass parameter name '{name}'. Supported names: "
-                    f"{sorted(mass_quantities.keys())}"
-                )
-            data[name] = mass_quantities[name]
-
-        for name in self.lambda_parameter_names:
-            if name not in lambda_quantities:
-                raise ValueError(
-                    f"Lambda parameter '{name}' is not available for "
-                    f"source_type='{self.source_type}'. "
-                    f"Available: {sorted(lambda_quantities.keys())}"
-                )
-            data[name] = lambda_quantities[name]
-
+        data = {**mass_quantities, **lambda_quantities}
         logger.info("Training data generation complete.")
         return data
 

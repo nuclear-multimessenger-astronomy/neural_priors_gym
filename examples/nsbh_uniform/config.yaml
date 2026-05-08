@@ -18,14 +18,9 @@ m_max_bh: 5.0
 
 masses:
   type: uniform
-  parameter_names:
-    - mass_1_source
-    - mass_2_source
   m_min: 1.0
 
 lambdas:
-  parameter_names:
-    - lambda_2
   # Point this to your EOS npz file (must contain masses_EOS and Lambdas_EOS)
   eos_path: ../../jester/examples/inference/smc_random_walk/chiEFT/eos_samples.npz
 
@@ -43,6 +38,12 @@ flow:
   batch_norm_between_transforms: false
 
 training:
+  # For NSBH, lambda_1 = 0 (BH has no tidal deformability); only lambda_2
+  # is physically meaningful. Include whichever parameters are needed.
+  parameter_names:
+    - mass_1_source
+    - mass_2_source
+    - lambda_2
   n_samples: 200000
   num_epochs: 500
   learning_rate: 0.0001

@@ -12,8 +12,6 @@ class MassGenerator(ABC):
     consistent with the chosen population model and the available EOS samples.
     """
 
-    parameter_names: list[str]
-
     @abstractmethod
     def generate(self, n_samples: int, mtov_array: np.ndarray) -> np.ndarray:
         """Generate mass pairs.

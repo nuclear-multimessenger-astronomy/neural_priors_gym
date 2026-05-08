@@ -23,9 +23,6 @@ from neural_priors_gym.data.masses.nsbh import NSBHMassGenerator
 from neural_priors_gym.data.masses.uniform import UniformMassGenerator
 
 
-PARAM_NAMES = ["mass_1_source", "mass_2_source"]
-
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -55,11 +52,9 @@ def nsbh_config_yaml(tmp_path: Path, small_eos_npz: Path) -> Path:
         "m_max_bh": 5.0,
         "masses": {
             "type": "uniform",
-            "parameter_names": ["mass_1_source", "mass_2_source"],
             "m_min": 1.0,
         },
         "lambdas": {
-            "parameter_names": ["lambda_2"],
             "eos_path": str(small_eos_npz),
         },
         "flow": {
@@ -70,6 +65,7 @@ def nsbh_config_yaml(tmp_path: Path, small_eos_npz: Path) -> Path:
             "num_bins": 4,
         },
         "training": {
+            "parameter_names": ["mass_1_source", "mass_2_source", "lambda_2"],
             "num_epochs": 2,
             "batch_size": 32,
             "n_samples": 100,
@@ -88,7 +84,6 @@ def derived_mass_config_yaml(tmp_path: Path, small_eos_npz: Path) -> Path:
         "output_dir": str(tmp_path / "outdir"),
         "masses": {
             "type": "double_gaussian",
-            "parameter_names": ["chirp_mass_source", "mass_ratio"],
             "m_min": 1.0,
             "mean_1": 1.34,
             "std_1": 0.07,
@@ -97,7 +92,6 @@ def derived_mass_config_yaml(tmp_path: Path, small_eos_npz: Path) -> Path:
             "weight": 0.65,
         },
         "lambdas": {
-            "parameter_names": ["lambda_1", "lambda_2"],
             "eos_path": str(small_eos_npz),
         },
         "flow": {
@@ -108,6 +102,12 @@ def derived_mass_config_yaml(tmp_path: Path, small_eos_npz: Path) -> Path:
             "num_bins": 4,
         },
         "training": {
+            "parameter_names": [
+                "chirp_mass_source",
+                "mass_ratio",
+                "lambda_1",
+                "lambda_2",
+            ],
             "num_epochs": 2,
             "batch_size": 32,
             "n_samples": 100,
@@ -147,9 +147,7 @@ def test_mass_ratio_values() -> None:
 
 
 def test_nsbh_m1_above_mtov(masses_EOS: np.ndarray) -> None:
-    ns_gen = UniformMassGenerator(
-        UniformMassConfig(parameter_names=PARAM_NAMES, m_min=1.0)
-    )
+    ns_gen = UniformMassGenerator(UniformMassConfig(m_min=1.0))
     gen = NSBHMassGenerator(ns_gen, m_max_bh=5.0)
     mtov = masses_EOS.max(axis=1)
     result = gen.generate(200, mtov)
@@ -158,9 +156,7 @@ def test_nsbh_m1_above_mtov(masses_EOS: np.ndarray) -> None:
 
 
 def test_nsbh_m2_below_mtov(masses_EOS: np.ndarray) -> None:
-    ns_gen = UniformMassGenerator(
-        UniformMassConfig(parameter_names=PARAM_NAMES, m_min=1.0)
-    )
+    ns_gen = UniformMassGenerator(UniformMassConfig(m_min=1.0))
     gen = NSBHMassGenerator(ns_gen, m_max_bh=5.0)
     mtov = masses_EOS.max(axis=1)
     result = gen.generate(200, mtov)
@@ -168,9 +164,7 @@ def test_nsbh_m2_below_mtov(masses_EOS: np.ndarray) -> None:
 
 
 def test_nsbh_m_max_bh_exceeded_raises(masses_EOS: np.ndarray) -> None:
-    ns_gen = UniformMassGenerator(
-        UniformMassConfig(parameter_names=PARAM_NAMES, m_min=1.0)
-    )
+    ns_gen = UniformMassGenerator(UniformMassConfig(m_min=1.0))
     # m_max_bh below every MTOV should raise
     gen = NSBHMassGenerator(ns_gen, m_max_bh=1.0)
     with pytest.raises(ValueError, match="m_max_bh"):
@@ -178,9 +172,7 @@ def test_nsbh_m_max_bh_exceeded_raises(masses_EOS: np.ndarray) -> None:
 
 
 def test_nsbh_generator_shape(masses_EOS: np.ndarray) -> None:
-    ns_gen = GaussianMassGenerator(
-        GaussianMassConfig(parameter_names=PARAM_NAMES, m_min=1.0, mean=1.33, std=0.09)
-    )
+    ns_gen = GaussianMassGenerator(GaussianMassConfig(m_min=1.0, mean=1.33, std=0.09))
     gen = NSBHMassGenerator(ns_gen, m_max_bh=5.0)
     result = gen.generate(50, masses_EOS.max(axis=1))
     assert result.shape == (50, 2)
@@ -189,7 +181,6 @@ def test_nsbh_generator_shape(masses_EOS: np.ndarray) -> None:
 def test_nsbh_double_gaussian(masses_EOS: np.ndarray) -> None:
     ns_gen = DoubleGaussianMassGenerator(
         DoubleGaussianMassConfig(
-            parameter_names=PARAM_NAMES,
             m_min=1.0,
             mean_1=1.34,
             std_1=0.07,
@@ -212,15 +203,21 @@ def test_nsbh_double_gaussian(masses_EOS: np.ndarray) -> None:
 def test_nsbh_config_loads(nsbh_config_yaml: Path) -> None:
     config = load_config(nsbh_config_yaml)
     assert config.source_type == "nsbh"
-    assert config.lambdas.parameter_names == ["lambda_2"]
+    assert config.training.parameter_names == [
+        "mass_1_source",
+        "mass_2_source",
+        "lambda_2",
+    ]
 
 
 def test_nsbh_generate_only_lambda2(nsbh_config_yaml: Path) -> None:
     config = load_config(nsbh_config_yaml)
     gen = TrainingDataGenerator.from_config(config)
     data = gen.generate()
+    # Generator now returns all quantities; lambda_2 is accessible
     assert "lambda_2" in data
-    assert "lambda_1" not in data
+    # lambda_1 is also present (set to 0 for BH) since generator returns all
+    assert "lambda_1" in data
 
 
 def test_nsbh_generate_length(nsbh_config_yaml: Path) -> None:
@@ -246,20 +243,26 @@ def test_nsbh_lambda2_positive(nsbh_config_yaml: Path) -> None:
 
 def test_derived_params_config_loads(derived_mass_config_yaml: Path) -> None:
     config = load_config(derived_mass_config_yaml)
-    assert config.masses.parameter_names == ["chirp_mass_source", "mass_ratio"]
+    assert config.training.parameter_names == [
+        "chirp_mass_source",
+        "mass_ratio",
+        "lambda_1",
+        "lambda_2",
+    ]
 
 
 def test_derived_params_generate_keys(derived_mass_config_yaml: Path) -> None:
     config = load_config(derived_mass_config_yaml)
     gen = TrainingDataGenerator.from_config(config)
     data = gen.generate()
+    # Generator now returns all quantities
     assert "chirp_mass_source" in data
     assert "mass_ratio" in data
     assert "lambda_1" in data
     assert "lambda_2" in data
-    # component masses should NOT appear since they're not in parameter_names
-    assert "mass_1_source" not in data
-    assert "mass_2_source" not in data
+    # component masses are also present since the generator computes all quantities
+    assert "mass_1_source" in data
+    assert "mass_2_source" in data
 
 
 def test_derived_params_mass_ratio_in_range(derived_mass_config_yaml: Path) -> None:
@@ -279,24 +282,23 @@ def test_derived_params_chirp_mass_positive(derived_mass_config_yaml: Path) -> N
 
 
 def test_unknown_mass_param_raises(small_eos_npz: Path) -> None:
-    """Requesting a name not in the supported set should raise."""
-    mass_config = UniformMassConfig(parameter_names=["nonsense_param"], m_min=1.0)
+    """Generator returns all known quantities; unknown names raise at the cli/trainer level."""
+    mass_config = UniformMassConfig(m_min=1.0)
     lambda_interp = EOSLambdaInterpolator(LambdaConfig(eos_path=str(small_eos_npz)))
     gen = TrainingDataGenerator(
         mass_generator=UniformMassGenerator(mass_config),
         lambda_interpolator=lambda_interp,
         n_samples=10,
-        mass_parameter_names=["nonsense_param"],
-        lambda_parameter_names=["lambda_1", "lambda_2"],
     )
-    with pytest.raises(ValueError, match="nonsense_param"):
-        gen.generate()
+    data = gen.generate()
+    # The generator returns all supported names; "nonsense_param" is simply absent
+    assert "nonsense_param" not in data
+    assert "mass_1_source" in data
 
 
 def test_double_gaussian_with_component_masses(small_eos_npz: Path) -> None:
-    """Double Gaussian population trained on component masses still works."""
+    """Double Gaussian population generates all quantities including component masses."""
     mass_config = DoubleGaussianMassConfig(
-        parameter_names=["mass_1_source", "mass_2_source"],
         m_min=1.0,
         mean_1=1.34,
         std_1=0.07,
@@ -309,8 +311,6 @@ def test_double_gaussian_with_component_masses(small_eos_npz: Path) -> None:
         mass_generator=DoubleGaussianMassGenerator(mass_config),
         lambda_interpolator=lambda_interp,
         n_samples=50,
-        mass_parameter_names=["mass_1_source", "mass_2_source"],
-        lambda_parameter_names=["lambda_1", "lambda_2"],
     )
     data = gen.generate()
     assert "mass_1_source" in data

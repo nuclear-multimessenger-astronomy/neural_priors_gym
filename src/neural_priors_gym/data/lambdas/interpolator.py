@@ -47,8 +47,6 @@ class EOSLambdaInterpolator:
     """
 
     def __init__(self, config: LambdaConfig) -> None:
-        self.parameter_names = config.parameter_names
-
         masses_raw, lambdas_raw = _load_eos_arrays(config)
 
         n_total = len(masses_raw)

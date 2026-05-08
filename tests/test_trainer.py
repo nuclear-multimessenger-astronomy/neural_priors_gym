@@ -81,7 +81,6 @@ def test_early_stopping_fires(tmp_path: Path, small_eos_npz: Path) -> None:
         "output_dir": str(tmp_path / "outdir"),
         "masses": {
             "type": "uniform",
-            "parameter_names": ["mass_1_source", "mass_2_source"],
             "m_min": 1.0,
         },
         "lambdas": {"eos_path": str(small_eos_npz)},
@@ -93,6 +92,12 @@ def test_early_stopping_fires(tmp_path: Path, small_eos_npz: Path) -> None:
             "num_bins": 4,
         },
         "training": {
+            "parameter_names": [
+                "mass_1_source",
+                "mass_2_source",
+                "lambda_1",
+                "lambda_2",
+            ],
             "num_epochs": 50,
             "batch_size": 64,
             "n_samples": 500,
@@ -129,7 +134,6 @@ def test_early_stopping_restores_best_checkpoint(
         "output_dir": str(tmp_path / "outdir"),
         "masses": {
             "type": "uniform",
-            "parameter_names": ["mass_1_source", "mass_2_source"],
             "m_min": 1.0,
         },
         "lambdas": {"eos_path": str(small_eos_npz)},
@@ -141,6 +145,12 @@ def test_early_stopping_restores_best_checkpoint(
             "num_bins": 4,
         },
         "training": {
+            "parameter_names": [
+                "mass_1_source",
+                "mass_2_source",
+                "lambda_1",
+                "lambda_2",
+            ],
             "num_epochs": 10,
             "batch_size": 64,
             "n_samples": 500,

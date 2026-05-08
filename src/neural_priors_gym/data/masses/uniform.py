@@ -16,7 +16,6 @@ class UniformMassGenerator(MassGenerator):
     """
 
     def __init__(self, config: UniformMassConfig) -> None:
-        self.parameter_names = config.parameter_names
         self.m_min = config.m_min
 
     def generate(self, n_samples: int, mtov_array: np.ndarray) -> np.ndarray:
