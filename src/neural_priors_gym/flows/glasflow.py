@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from glasflow.flows.nsf import CouplingNSF
+from torch import device, float32, tanh, tensor
 from torch.utils.data import DataLoader
 
 from neural_priors_gym.config.schemas.flow import GlasflowConfig
@@ -16,13 +17,13 @@ from .base import FlowBase
 
 logger = get_logger("neural_priors_gym.flows")
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+DEVICE = device("cuda" if torch.cuda.is_available() else "cpu")
 
 _ACTIVATION_MAP = {
     "relu": F.relu,
     "gelu": F.gelu,
     "silu": F.silu,
-    "tanh": torch.tanh,
+    "tanh": tanh,
 }
 
 MODEL_WEIGHTS_FILE = "model.pt"
@@ -109,7 +110,7 @@ class GlasflowNSF(FlowBase):
 
     def log_prob(self, x: np.ndarray) -> np.ndarray:
         self._flow.eval()
-        x_tensor = torch.tensor(x, dtype=torch.float32).to(DEVICE)
+        x_tensor = tensor(x, dtype=float32).to(DEVICE)
         with torch.no_grad():
             lp = self._flow.log_prob(inputs=x_tensor)
         return lp.cpu().numpy()
