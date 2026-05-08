@@ -8,6 +8,7 @@ import numpy as np
 from neural_priors_gym.config.parser import load_config
 from neural_priors_gym.config.schema import TrainingConfig
 from neural_priors_gym.data.generator import TrainingDataGenerator
+from neural_priors_gym.evaluation.bounds import check_out_of_bounds
 from neural_priors_gym.evaluation.metrics import compute_jsd
 from neural_priors_gym.logging_config import get_logger
 from neural_priors_gym.plotting.plots import (
@@ -111,8 +112,24 @@ def main(config: TrainingConfig) -> None:
     for name, jsd in zip(parameter_names, jsd_per_dim):
         logger.info(f"  {name}: {jsd:.2f} millibits")
 
+    oob_results = check_out_of_bounds(flow_samples_original, parameter_names)
+    if oob_results:
+        logger.info("Out-of-bounds flow samples:")
+        for name, stats in oob_results.items():
+            logger.info(
+                f"  {name}: {stats['pct_oob']:.2f}% OOB "
+                f"({stats['pct_below']:.2f}% below, {stats['pct_above']:.2f}% above)"
+            )
+    else:
+        logger.info("No out-of-bounds parameters detected in flow samples.")
+
     plot_corner(
-        x_data[:n_eval], flow_samples_original, jsd_per_dim, parameter_names, output_dir
+        x_data[:n_eval],
+        flow_samples_original,
+        jsd_per_dim,
+        parameter_names,
+        output_dir,
+        oob_results=oob_results if oob_results else None,
     )
 
     logger.info(f"Training complete. All outputs saved to {output_dir}")
