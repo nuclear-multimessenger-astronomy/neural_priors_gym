@@ -67,6 +67,7 @@ Flow configuration schemas
    :toctree: _autosummary/
 
    GlasflowConfig
+   ZukoMAFConfig
 
 Training hyperparameter schema
 -------------------------------

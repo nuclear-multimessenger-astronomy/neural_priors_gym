@@ -18,6 +18,11 @@ class FlowBase(ABC):
     """
 
     @abstractmethod
+    def set_optimizer(self, learning_rate: float) -> None:
+        """Initialise the optimizer (called by FlowTrainer before training)."""
+        ...
+
+    @abstractmethod
     def train_epoch(self, data_loader: "DataLoader") -> float:
         """Run one training epoch and return the mean negative log-likelihood."""
         ...

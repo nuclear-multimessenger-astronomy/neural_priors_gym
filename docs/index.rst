@@ -33,6 +33,7 @@ and NSBH gravitational-wave analyses.
 
        Train a normalizing flow on the generated prior samples
 
+       - ``zuko`` MAF (Masked Autoregressive Flow)
        - ``glasflow`` CouplingNSF (Neural Spline Flow)
 
     .. grid-item:: 🌟 Source types

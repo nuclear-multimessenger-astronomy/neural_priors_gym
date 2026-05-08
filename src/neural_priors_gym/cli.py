@@ -61,23 +61,15 @@ def main(config: TrainingConfig) -> None:
         return
 
     # Train flow
+    model_dir = output_dir / "model"
     logger.info(f"Will report every {config.training.log_every_n_epochs} epochs")
     trainer = FlowTrainer(config)
     flow, train_losses, val_losses, scaler = trainer.train(
-        training_data, parameter_names, output_dir=output_dir
+        training_data, parameter_names, output_dir=model_dir
     )
 
     # Save flow
-    model_dir = output_dir / "model"
     flow.save(model_dir)
-
-    # Copy scaler to model dir so the model directory is self-contained
-    if scaler is not None:
-        import shutil
-
-        scaler_src = output_dir / "scaler.gz"
-        if scaler_src.exists():
-            shutil.copy(scaler_src, model_dir / "scaler.gz")
 
     # Plots and evaluation
     plot_losses(train_losses, val_losses, output_dir)

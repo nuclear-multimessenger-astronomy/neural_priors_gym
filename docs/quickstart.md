@@ -42,13 +42,12 @@ lambdas:
   eos_path: /path/to/your/eos_samples.npz
 
 flow:
-  backend: glasflow
-  n_transforms: 4
-  n_neurons: 256
-  n_blocks_per_transform: 3
-  num_bins: 8
-  tail_bound: 5.0
-  activation: relu
+  backend: zuko
+  flow_type: maf
+  transforms: 4
+  hidden_features:
+    - 64
+    - 64
 
 training:
   n_samples: 20000
@@ -118,7 +117,8 @@ lambdas:
   eos_path: /path/to/your/eos_samples.npz
 
 flow:
-  backend: glasflow
+  backend: zuko
+  flow_type: maf
 
 training:
   n_samples: 20000
@@ -156,7 +156,7 @@ smooth prior typically reaches a mean JSD below a few millibits per dimension.
    ``lambdas.parameter_names`` to ``[lambda_2]`` (only the NS contributes tidal
    deformability).
 3. **Tune the flow architecture** — see the {ref}`yaml-reference-flow` section
-   for all ``glasflow`` hyperparameters.
+   for all ``zuko_maf`` and ``glasflow`` hyperparameters.
 4. **Use the trained prior in bilby** — the ``model/`` directory is self-contained
    and can be loaded to sample from or evaluate the learned prior density.
 

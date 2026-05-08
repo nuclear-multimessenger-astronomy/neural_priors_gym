@@ -26,7 +26,17 @@ class GlasflowConfig(NeuralPriorBaseModel):
     batch_norm_between_transforms: bool = False
 
 
+class ZukoMAFConfig(NeuralPriorBaseModel):
+    """Configuration for the zuko Masked Autoregressive Flow (MAF) backend."""
+
+    backend: Literal["zuko"] = "zuko"
+    flow_type: Literal["maf"] = "maf"
+    transforms: int = 3
+    randperm: bool = False
+    hidden_features: list[int] = [64, 64]
+
+
 FlowConfig = Annotated[
-    Union[GlasflowConfig,],
+    Union[GlasflowConfig, ZukoMAFConfig],
     Discriminator("backend"),
 ]

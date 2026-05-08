@@ -1,0 +1,44 @@
+# Example config for training a neural prior on BNS source-frame masses
+# using the zuko Masked Autoregressive Flow (MAF) backend.
+#
+# MAF uses autoregressive transforms instead of coupling layers, which can
+# be more expressive for low-dimensional problems at the cost of slower
+# sampling (each sample requires sequential passes through the network).
+#
+# Usage: neural_priors_gym_train config.yaml
+
+output_dir: ./outdir
+
+source_type: bns
+
+masses:
+  type: uniform
+  parameter_names:
+    - mass_1_source
+    - mass_2_source
+  m_min: 1.0
+
+lambdas:
+  parameter_names:
+    - lambda_1
+    - lambda_2
+  # Point this to your EOS npz file (must contain masses_EOS and Lambdas_EOS)
+  eos_path: ../../jester/examples/inference/smc_random_walk/chiEFT/eos_samples.npz
+
+flow:
+  backend: zuko
+  flow_type: maf         # Type of zuko flow (maf = Masked Autoregressive Flow)
+  transforms: 4          # Number of autoregressive transform layers
+  randperm: false        # Randomly permute features between transforms
+  hidden_features:       # Hidden layer sizes in each masked MLP
+    - 64
+    - 64
+
+training:
+  n_samples: 20000
+  num_epochs: 500
+  learning_rate: 0.0001
+  batch_size: 1024
+  max_patience: 100
+  validation_split: 0.2
+  scale_input: true

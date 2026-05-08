@@ -246,7 +246,7 @@ lambdas:
 ## Flow configuration
 
 The `flow` section configures the normalizing flow backend and architecture.
-The `backend` field selects the backend; currently only `"glasflow"` is supported.
+The `backend` field selects the backend; currently `"glasflow"` and `"zuko"` are supported.
 
 ### Glasflow CouplingNSF
 
@@ -304,6 +304,47 @@ flow:
   normalization inside each residual block of the conditioner networks.
 - **`batch_norm_between_transforms`** (`bool`, default: `false`) — Apply batch
   normalization between consecutive coupling transform layers.
+
+::::
+
+### Zuko MAF
+
+The zuko MAF backend wraps the ``zuko`` library's ``MAF`` (Masked Autoregressive
+Flow). Each transform is a masked autoregressive layer whose parameters are
+predicted by a masked MLP, ensuring the autoregressive property.
+Compared to coupling-based flows, MAF can be more expressive for
+low-dimensional data, but sampling requires one sequential forward pass per
+feature rather than a single parallel pass.
+The Pydantic config schema is {class}`~neural_priors_gym.config.schemas.flow.ZukoMAFConfig`.
+
+::::{dropdown} **Zuko MAF configuration**
+
+```yaml
+flow:
+  backend: zuko                  # Required: selects the zuko backend
+  flow_type: maf                 # Required: type of zuko flow (maf = Masked Autoregressive Flow)
+  transforms: 3                  # Number of autoregressive transform layers
+  randperm: false                # Randomly permute features between transforms
+  hidden_features:               # Hidden layer sizes in each masked MLP
+    - 64
+    - 64
+```
+
+**Field details:**
+
+- **`backend`** (`str`) — Must be `"zuko"` for this configuration.
+- **`flow_type`** (`str`) — Must be `"maf"` for the Masked Autoregressive Flow. This field selects which zuko flow type to use, allowing other zuko flows to be added in the future.
+- **`transforms`** (`int`, default: `3`) — Number of autoregressive transform
+  layers. More transforms increase the expressiveness of the flow. A value of
+  3–6 is a good starting point for the 4-dimensional (mass, Lambda) space.
+- **`randperm`** (`bool`, default: `false`) — When `true`, features are randomly
+  permuted between consecutive autoregressive transforms. When `false`, the
+  ordering alternates between forward and reverse. Random permutation can
+  improve mixing but makes results non-reproducible without a fixed seed.
+- **`hidden_features`** (`list[int]`, default: `[64, 64]`) — Width of each hidden
+  layer in the masked MLP that parameterises each autoregressive transform.
+  Increasing depth or width raises model capacity at the cost of more parameters
+  and slower training.
 
 ::::
 
@@ -485,6 +526,49 @@ flow:
 
 training:
   n_samples: 200000
+  num_epochs: 500
+  learning_rate: 0.0001
+  batch_size: 1024
+  max_patience: 100
+```
+
+::::
+
+### BNS with uniform masses and zuko MAF
+
+The same BNS uniform prior as above, but using the zuko Masked Autoregressive
+Flow backend. This is a good starting point for comparing the two backends on
+the same dataset.
+
+::::{dropdown} **BNS uniform with zuko MAF**
+
+```yaml
+output_dir: ./outdir
+source_type: bns
+
+masses:
+  type: uniform
+  parameter_names:
+    - mass_1_source
+    - mass_2_source
+  m_min: 1.0
+
+lambdas:
+  parameter_names:
+    - lambda_1
+    - lambda_2
+  eos_path: /path/to/eos_samples.npz
+
+flow:
+  backend: zuko
+  flow_type: maf
+  transforms: 4
+  hidden_features:
+    - 64
+    - 64
+
+training:
+  n_samples: 20000
   num_epochs: 500
   learning_rate: 0.0001
   batch_size: 1024

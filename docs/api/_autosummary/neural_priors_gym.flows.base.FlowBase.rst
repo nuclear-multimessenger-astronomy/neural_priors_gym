@@ -19,6 +19,7 @@
       ~FlowBase.log_prob
       ~FlowBase.sample
       ~FlowBase.save
+      ~FlowBase.set_optimizer
       ~FlowBase.train_epoch
    
    
