@@ -31,3 +31,14 @@ Glasflow backend
    :toctree: _autosummary/
 
    GlasflowNSF
+
+Zuko MAF backend
+----------------
+
+.. currentmodule:: neural_priors_gym.flows.zuko_maf
+
+.. autosummary::
+   :nosignatures:
+   :toctree: _autosummary/
+
+   ZukoMAF

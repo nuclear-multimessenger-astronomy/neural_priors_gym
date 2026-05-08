@@ -12,9 +12,10 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, TensorDataset
 
 from neural_priors_gym.config.schema import TrainingConfig
-from neural_priors_gym.config.schemas.flow import GlasflowConfig
+from neural_priors_gym.config.schemas.flow import GlasflowConfig, ZukoMAFConfig
 from neural_priors_gym.flows.base import FlowBase
 from neural_priors_gym.flows.glasflow import GlasflowNSF
+from neural_priors_gym.flows.zuko_maf import ZukoMAF
 from neural_priors_gym.logging_config import get_logger
 
 logger = get_logger("neural_priors_gym.training")
@@ -42,6 +43,8 @@ class FlowTrainer:
         flow_config = self.config.flow
         if isinstance(flow_config, GlasflowConfig):
             return GlasflowNSF.from_config(flow_config, n_inputs)
+        if isinstance(flow_config, ZukoMAFConfig):
+            return ZukoMAF.from_config(flow_config, n_inputs)
         raise ValueError(f"Unknown flow config type: {type(flow_config)}")
 
     def train(
@@ -110,7 +113,6 @@ class FlowTrainer:
             logger.info(f"MinMaxScaler saved to {save_dir / SCALER_FILE}")
 
         flow = self.build_flow(n_inputs)
-        assert isinstance(flow, GlasflowNSF)
         flow.set_optimizer(cfg.learning_rate)
 
         train_tensor = torch.tensor(x_train, dtype=torch.float32)
