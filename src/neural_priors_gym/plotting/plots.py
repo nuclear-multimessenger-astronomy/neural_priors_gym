@@ -108,12 +108,14 @@ def plot_corner(
     output_dir: Path,
     filename: str = "corner_plot.pdf",
     n_plot: Optional[int] = 10_000,
+    oob_results: Optional[dict[str, dict[str, float]]] = None,
 ) -> None:
     """Overlay corner plots of training data and flow samples.
 
     A random subset of n_plot samples is used from each set to keep the plot
     readable. The JSD in millibits for each 1D marginal is shown above the
-    corresponding diagonal panel.
+    corresponding diagonal panel. If *oob_results* is provided, the
+    out-of-bounds percentage is appended to the title for any flagged parameter.
     """
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -155,8 +157,12 @@ def plot_corner(
     n = len(parameter_names)
     for ax in axes:
         ax.tick_params(labelsize=_CORNER_TICK_FONTSIZE)
-    for i, jsd in enumerate(jsd_millibits):
-        axes[i * n + i].set_title(f"{jsd:.1f} mb", fontsize=_CORNER_TICK_FONTSIZE)
+    for i, (name, jsd) in enumerate(zip(parameter_names, jsd_millibits)):
+        title = f"{jsd:.1f} mb"
+        if oob_results is not None and name in oob_results:
+            pct = oob_results[name]["pct_oob"]
+            title += f" | OOB: {pct:.1f}%"
+        axes[i * n + i].set_title(title, fontsize=_CORNER_TICK_FONTSIZE)
 
     save_path = output_dir / filename
     fig.savefig(save_path, bbox_inches="tight")
