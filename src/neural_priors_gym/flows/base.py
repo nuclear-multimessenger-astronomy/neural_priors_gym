@@ -61,6 +61,28 @@ class FlowBase(ABC):
         ...
 
     @abstractmethod
+    def latent_to_data(self, z: np.ndarray) -> np.ndarray:
+        """Map samples from the standard normal latent space to data space.
+
+        This is the generative direction of the flow (inverse of the normalising
+        transform).  It is the operation needed by nested samplers such as
+        dynesty to rescale from a unit hypercube through a standard normal into
+        the parameter space.
+
+        Parameters
+        ----------
+        z:
+            Samples from the standard normal latent space, shape
+            ``(n, n_inputs)``.
+
+        Returns
+        -------
+        np.ndarray
+            Corresponding samples in data space, shape ``(n, n_inputs)``.
+        """
+        ...
+
+    @abstractmethod
     def save(self, directory: Path) -> None:
         """Save the flow weights and metadata to directory."""
         ...
