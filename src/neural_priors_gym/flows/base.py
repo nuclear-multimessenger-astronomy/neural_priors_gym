@@ -1,5 +1,6 @@
 """Abstract base class for normalizing flow backends."""
 
+import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -52,3 +53,101 @@ class FlowBase(ABC):
     def load(cls, directory: Path) -> "FlowBase":
         """Load a saved flow from directory."""
         ...
+
+    @classmethod
+    def load_from_dir(cls, directory: Path) -> "FlowBase":
+        r"""Load a flow from a model directory by dispatching on the backend field.
+
+        Reads ``model_kwargs.json``, determines the ``backend`` value, and calls
+        the appropriate subclass ``load()`` method.
+
+        Parameters
+        ----------
+        directory:
+            Path to the model directory produced by :class:`FlowTrainer`.
+
+        Returns
+        -------
+        FlowBase
+            The loaded flow instance.
+
+        Raises
+        ------
+        FileNotFoundError
+            If ``model_kwargs.json`` is absent from *directory*.
+        ValueError
+            If ``model_kwargs.json`` does not contain a ``backend`` key.
+        NotImplementedError
+            If the backend value is not registered.
+
+        Notes
+        -----
+        **Adding a new backend**: register the new subclass in the
+        ``_BACKEND_REGISTRY`` dict inside this method.  Failing to do so will
+        cause ``load_from_dir`` to raise :exc:`NotImplementedError` for any
+        model saved with the new backend.
+        """
+        directory = Path(directory)
+        kwargs_path = directory / "model_kwargs.json"
+        if not kwargs_path.exists():
+            raise FileNotFoundError(f"model_kwargs.json not found in {directory}")
+
+        with open(kwargs_path) as f:
+            model_kwargs = json.load(f)
+
+        backend = model_kwargs.get("backend")
+        if backend is None:
+            raise ValueError(
+                f"'backend' key missing from model_kwargs.json in {directory}"
+            )
+
+        # Imported lazily to avoid circular imports at module load time.
+        # IMPORTANT: register every new backend class here.
+        from neural_priors_gym.flows.glasflow import GlasflowNSF
+        from neural_priors_gym.flows.zuko_maf import ZukoMAF
+
+        _BACKEND_REGISTRY: dict[str, type["FlowBase"]] = {
+            "glasflow": GlasflowNSF,
+            "zuko": ZukoMAF,
+        }
+
+        if backend not in _BACKEND_REGISTRY:
+            raise NotImplementedError(
+                f"Backend '{backend}' is not registered in FlowBase.load_from_dir. "
+                f"Supported backends: {list(_BACKEND_REGISTRY.keys())}. "
+                "To add a new backend, register its class in the _BACKEND_REGISTRY "
+                "dict inside FlowBase.load_from_dir in "
+                "neural_priors_gym/flows/base.py."
+            )
+
+        return _BACKEND_REGISTRY[backend].load(directory)
+
+    @staticmethod
+    def compute_log_jacobian_correction(scaler) -> float:
+        r"""Compute the log-determinant Jacobian correction for a MinMaxScaler.
+
+        When data is scaled via :math:`x'_i = (x_i - x_{\min,i}) /
+        (x_{\max,i} - x_{\min,i})`, the per-dimension Jacobian factor is
+        :math:`1 / (x_{\max,i} - x_{\min,i})`, giving
+
+        .. math::
+
+            \log |\det J| = -\sum_i \log(x_{\max,i} - x_{\min,i}).
+
+        This correction must be added to the flow log-probability when the flow
+        was trained on scaled data and the log-prob is evaluated in the original
+        (unscaled) parameter space.
+
+        Parameters
+        ----------
+        scaler:
+            A fitted ``sklearn.preprocessing.MinMaxScaler`` instance with
+            ``data_max_`` and ``data_min_`` attributes populated.
+
+        Returns
+        -------
+        float
+            The log-determinant Jacobian correction.
+        """
+        param_ranges = scaler.data_max_ - scaler.data_min_
+        return float(-np.sum(np.log(param_ranges)))
