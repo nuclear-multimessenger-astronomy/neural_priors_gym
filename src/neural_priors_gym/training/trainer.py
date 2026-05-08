@@ -9,7 +9,6 @@ import numpy as np
 import torch
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
-from torch import device, float32, tensor
 from torch.utils.data import DataLoader, TensorDataset
 
 from neural_priors_gym.config.schema import TrainingConfig
@@ -21,7 +20,7 @@ from neural_priors_gym.logging_config import get_logger
 logger = get_logger("neural_priors_gym.training")
 
 SCALER_FILE = "scaler.gz"
-DEVICE = device("cuda" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class FlowTrainer:
@@ -114,8 +113,8 @@ class FlowTrainer:
         assert isinstance(flow, GlasflowNSF)
         flow.set_optimizer(cfg.learning_rate)
 
-        train_tensor = tensor(x_train, dtype=float32)
-        val_tensor = tensor(x_val, dtype=float32)
+        train_tensor = torch.tensor(x_train, dtype=torch.float32)
+        val_tensor = torch.tensor(x_val, dtype=torch.float32)
         train_loader = DataLoader(
             TensorDataset(train_tensor), batch_size=cfg.batch_size, shuffle=True
         )
