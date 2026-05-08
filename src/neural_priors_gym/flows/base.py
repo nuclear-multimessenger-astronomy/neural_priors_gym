@@ -3,7 +3,7 @@
 import json
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -16,7 +16,24 @@ class FlowBase(ABC):
 
     Each backend (glasflow, zuko, etc.) provides a concrete subclass that
     wraps the backend-specific flow object and implements this API.
+
+    Attributes
+    ----------
+    _flow:
+        The backend-specific flow model object (e.g. a glasflow
+        ``CouplingNSF`` or a zuko ``MAF``).  Set by each subclass's
+        ``__init__``.
+    n_inputs:
+        Dimensionality of the data the flow was built for.  Set by each
+        subclass's ``__init__``.
+    config:
+        The hyperparameter config object used to construct the flow.  Set by
+        each subclass's ``__init__``.
     """
+
+    _flow: Any
+    n_inputs: int
+    config: Any
 
     @abstractmethod
     def set_optimizer(self, learning_rate: float) -> None:
