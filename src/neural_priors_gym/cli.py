@@ -1,4 +1,4 @@
-"""Command-line entry point for neural_priors_gym_train."""
+"""Command-line entry point for train_neural_prior."""
 
 import sys
 from pathlib import Path
@@ -136,9 +136,9 @@ def main(config: TrainingConfig) -> None:
 
 
 def cli_entry_point() -> None:
-    """Console script entry point: neural_priors_gym_train config.yaml"""
+    """Console script entry point: train_neural_prior config.yaml"""
     if len(sys.argv) != 2:
-        print("Usage: neural_priors_gym_train <config.yaml>")
+        print("Usage: train_neural_prior <config.yaml>")
         sys.exit(1)
 
     config_path = sys.argv[1]

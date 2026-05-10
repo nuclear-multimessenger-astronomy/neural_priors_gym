@@ -5,7 +5,7 @@
 # be more expressive for low-dimensional problems at the cost of slower
 # sampling (each sample requires sequential passes through the network).
 #
-# Usage: neural_priors_gym_train config.yaml
+# Usage: train_neural_prior config.yaml
 
 output_dir: ./outdir
 

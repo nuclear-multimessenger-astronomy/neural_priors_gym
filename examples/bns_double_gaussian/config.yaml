@@ -8,7 +8,7 @@
 #
 # Population hyperparameters are taken from arXiv:2407.16669.
 #
-# Usage: neural_priors_gym_train config.yaml
+# Usage: train_neural_prior config.yaml
 
 output_dir: ./outdir
 

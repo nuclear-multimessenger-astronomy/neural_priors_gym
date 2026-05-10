@@ -71,13 +71,13 @@ training:
 From the directory containing ``config.yaml``, run:
 
 ```bash
-neural_priors_gym_train config.yaml
+train_neural_prior config.yaml
 ```
 
 ```{note}
 This command is only available after activating the environment where
 ``neural_priors_gym`` was installed. If the command is not found, try
-``uv run neural_priors_gym_train config.yaml`` to use the package's virtual
+``uv run train_neural_prior config.yaml`` to use the package's virtual
 environment directly.
 ```
 
@@ -94,7 +94,7 @@ environment directly.
 
 Before committing to a full training run, it is often useful to inspect the
 generated training data to verify the prior looks as expected. Setting
-``generate_only: true`` in the config causes ``neural_priors_gym_train`` to
+``generate_only: true`` in the config causes ``train_neural_prior`` to
 generate and save the training data and its corner plot, then exit without
 training the flow:
 
