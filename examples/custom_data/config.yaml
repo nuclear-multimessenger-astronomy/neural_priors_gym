@@ -7,7 +7,7 @@
 # The npz file must contain all keys listed in training.parameter_names.
 # Any parameter names are supported as long as they exist in the file.
 #
-# Usage: neural_priors_gym_train config.yaml
+# Usage: train_neural_prior config.yaml
 
 output_dir: ./outdir
 

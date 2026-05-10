@@ -14,6 +14,47 @@
 >
 > **[Read the full documentation →](https://nuclear-multimessenger-astronomy.github.io/neural_priors_gym/)**
 
+## Minimal example
+
+Write a `config.yaml`:
+
+```yaml
+output_dir: ./outdir
+source_type: bns
+
+masses:
+  type: uniform
+  m_min: 1.0
+
+lambdas:
+  eos_path: /path/to/eos_samples.npz  # must contain `masses_EOS` and `Lambdas_EOS`
+
+flow:
+  backend: zuko
+  flow_type: maf
+  transforms: 4
+  hidden_features: [64, 64]
+
+training:
+  parameter_names: [mass_1_source, mass_2_source, lambda_1, lambda_2]
+  n_samples: 20000
+  num_epochs: 500
+  learning_rate: 0.0001
+  batch_size: 1024
+  max_patience: 100
+  validation_split: 0.2
+  scale_input: true
+```
+
+Then train:
+
+```bash
+train_neural_prior config.yaml
+```
+
+The trained flow is saved to `outdir/model/` and ready to use as a prior in bilby or any other sampler.
+More config settings and examples are detailed in the documentation.
+
 ## Installation
 
 Install the latest version by cloning the repository:

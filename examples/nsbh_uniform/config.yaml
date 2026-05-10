@@ -6,7 +6,7 @@
 # [m_min, MTOV]. Only lambda_2 (the NS tidal deformability) is included;
 # the BH has no tidal deformability.
 #
-# Usage: neural_priors_gym_train config.yaml
+# Usage: train_neural_prior config.yaml
 
 output_dir: ./outdir
 

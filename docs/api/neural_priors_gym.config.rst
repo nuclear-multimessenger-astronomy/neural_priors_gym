@@ -4,7 +4,7 @@
 .. currentmodule:: neural_priors_gym.config
 
 The configuration module provides Pydantic v2 models that validate and parse the
-YAML configuration file used to drive ``neural_priors_gym_train``. The top-level
+YAML configuration file used to drive ``train_neural_prior``. The top-level
 entry point is :func:`~neural_priors_gym.config.parser.load_config`, which reads
 a YAML file and returns a validated :class:`~neural_priors_gym.config.schema.TrainingConfig`.
 For a complete reference of all supported configuration fields, see the

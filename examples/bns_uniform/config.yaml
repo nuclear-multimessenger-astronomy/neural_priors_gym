@@ -1,7 +1,7 @@
 # Example config for training a neural prior on BNS source-frame masses
 # with a uniform mass distribution and chiEFT EOS samples.
 #
-# Usage: neural_priors_gym_train config.yaml
+# Usage: train_neural_prior config.yaml
 
 output_dir: ./outdir
 
