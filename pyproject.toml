@@ -42,7 +42,7 @@ dependencies = [
     "tqdm",
     "astropy>=7.2.0",
     "zuko",
-    "jestertov @ git+https://github.com/nuclear-multimessenger-astronomy/jester.git@main",
+    "jestertov @ git+https://github.com/nuclear-multimessenger-astronomy/jester.git@fix_jax_dependency",
 ]
 
 classifiers = [
